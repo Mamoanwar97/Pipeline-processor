@@ -9,13 +9,13 @@ z2
 cModel Technology
 dC:/intelFPGA_pro/17.1
 vALU
-Z0 !s110 1573324138
+Z0 !s110 1573327962
 !i10b 1
 !s100 Yg_?M@IjTXBDhNMoW=lD]0
 I5ji8[3hn4iH[F@V3<Ezgd2
 Z1 VDg1SIo80bB@j0V0VzS_@n1
 Z2 dC:/Pipeline
-Z3 w1573324136
+Z3 w1573327955
 Z4 8C:/Pipeline/Pipeline.v
 Z5 FC:/Pipeline/Pipeline.v
 L0 663
@@ -23,15 +23,15 @@ Z6 OV;L;10.5c;63
 r1
 !s85 0
 31
-Z7 !s108 1573324138.000000
+Z7 !s108 1573327962.000000
 Z8 !s107 C:/Pipeline/Pipeline.v|
-Z9 !s90 -reportprogress|300|-work|work|-stats=none|C:/Pipeline/Pipeline.v|
+Z9 !s90 -reportprogress|30|-work|work|C:/Pipeline/Pipeline.v|
 !i113 1
 Z10 o-work work
 Z11 tCvgOpt 0
 n@a@l@u
 vALU_CONTROL
-Z12 !s110 1573324139
+R0
 !i10b 1
 !s100 GiDU9[O3]1aO;iii`582@1
 IZMY1G1aaHQ1i@hDL`@[m22
@@ -141,7 +141,7 @@ R10
 R11
 n@c@o@n@t@r@o@l
 vDATA_MEMORY
-R12
+R0
 !i10b 1
 !s100 U0@1hbA73O>k[mgP9n4j72
 ISPUJFQfLBNgI2K?h:WjoE0
@@ -163,7 +163,7 @@ R10
 R11
 n@d@a@t@a_@m@e@m@o@r@y
 vEX_MemReg
-R12
+R0
 !i10b 1
 !s100 l[7mc9LMfEdc1FDMgD9Q:2
 IBQUCX0lbT=:BLi>44C7Ej1
@@ -185,7 +185,7 @@ R10
 R11
 n@e@x_@mem@reg
 vForwarding_Unit_EX
-R12
+R0
 !i10b 1
 !s100 Jh1;lFD?NEUVIo7<Hz2ML2
 I9ET]kG70YIUg4FX<k=Ob91
@@ -207,7 +207,7 @@ R10
 R11
 n@forwarding_@unit_@e@x
 vHazard_MUX_10_1
-R12
+R0
 !i10b 1
 !s100 z2392z7b1;Z`hV@>3W[0K1
 ISbL;4m2YYLoiZ3GW=kLI42
@@ -361,7 +361,7 @@ R10
 R11
 n@j@u@m@p_@a@d@d@r@e@s@s
 vMem_WbReg
-R12
+R0
 !i10b 1
 !s100 W5nPDg^jeZF71Y15kjY6U1
 I[AIFFGfhEU7TP4oz34EiI3
@@ -383,7 +383,7 @@ R10
 R11
 n@mem_@wb@reg
 vMUX_32_1
-R12
+R0
 !i10b 1
 !s100 5JmVN2XEY50ZcfQHUj;T93
 I^9KbdXaOz@96HKCH]3j<L1
@@ -405,7 +405,7 @@ R10
 R11
 n@m@u@x_32_1
 vMUX_32_2
-R12
+R0
 !i10b 1
 !s100 BGGOlFc`adGGm2UPK:J^O2
 IanM9oFHWLJVLQ7XR7>Eb50
@@ -427,7 +427,7 @@ R10
 R11
 n@m@u@x_32_2
 vMUX_5_1
-R12
+R0
 !i10b 1
 !s100 eb45kfa29[3E7ScjBkiRE2
 I^cVmz9@8OQ_>UJJ0T2>VT2
@@ -493,10 +493,10 @@ R10
 R11
 n@p@c_@a@d@d@e@r
 vPipeline_MIPS
-R12
+R0
 !i10b 1
-!s100 _<hk6oofmIfBWhTPO6@@L3
-IoJ;[]Y49kQTP=TH;MMQMa3
+!s100 IRHo:l1?1obm^GHcL7dZ72
+IhMODSg1XU_Dlk_zj1HWe72
 R1
 R2
 R3
@@ -515,7 +515,7 @@ R10
 R11
 n@pipeline_@m@i@p@s
 vReg_Dst_MUX
-R12
+R0
 !i10b 1
 !s100 FdnDoCMMa=IeiMKXiIEBX0
 I69U6CHD5@kAfE@bSf?I`g2
@@ -581,7 +581,7 @@ R10
 R11
 n@s@i@g@n_@e@x@t@e@n@d
 vstall_or_flush
-R12
+R0
 !i10b 1
 !s100 z8fzP5HY_LYMgE_AASCYG3
 I4ZUkbD];lh;oj`o:;zYV43

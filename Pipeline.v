@@ -1336,7 +1336,7 @@ always @(negedge Clock)
 begin
 
 file = $fopen("pc.txt");
-$fwrite(file,"%0d,%0d,%0d %0d,%0d,%0d,%0d\n",pcOut, gui_hold,gui_flush,Jump,upper_mux_forward,lower_mux_forward,mem_wb_memtoreg);
+$fwrite(file,"%0d,%0d,%0d %0d,%0d,%0d,%0d\n",pcOut, gui_hold,gui_flush,branch_or_output,upper_mux_forward,lower_mux_forward,mem_wb_memtoreg);
 end
 /*
 
