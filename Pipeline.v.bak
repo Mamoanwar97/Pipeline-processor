@@ -1,3 +1,4 @@
+
 `timescale 1ns / 1ns
 module CLOCK(Clock);
 	output reg Clock;
@@ -219,7 +220,7 @@ module HazardDetectionUnit( ID_ExMemRead ,  ID_Ex_RegDst , IF_ID_Instr , holdPC 
         	end	
         end                 
 		/*========================= Set Flush When Found Branch or Jump ================*/
-		if( ( ( IF_ID_Instr [31:26] == 6'b000100 || IF_ID_Instr [31:26] ==  6'b000101 ) &&  Branch_And_Output ) || ( ( IF_ID_Instr [31:26] == 6'b000010 || IF_ID_Instr [31:26] ==  6'b000011 ) &&  Jump ) ) 
+		if( ( ( IF_ID_Instr [31:26] == 6'b000100 || IF_ID_Instr [31:26] ==  6'b000101 ) &&  Branch_And_Output ) || Jump  ) 
 		begin
 			IF_ID_Flush <= 1'b1; //ha2ool lel instruction ely fel IF_ID ely 7aslha fetch w da5lt mesh fakrak yaaad //w nerza3ha ka7ka	
 		end  
@@ -230,10 +231,11 @@ module HazardDetectionUnit( ID_ExMemRead ,  ID_Ex_RegDst , IF_ID_Instr , holdPC 
 		/*===============================================================================*/
     	end
 endmodule
-module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg , ALU_Op , Mem_Write , ALU_Src , Reg_Write , Jump, Inst_31_26);
-	output reg  Ori,Branch,Branch_Not_Equal,Mem_Read,Mem_Write,ALU_Src,Reg_Write,Jump , Reg_Dst , Mem_to_Reg ;
+module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg , ALU_Op , Mem_Write , ALU_Src , Reg_Write , Jump, Inst_31_26, Inst_5_0 );
+	output reg  Ori,Branch,Branch_Not_Equal,Mem_Read,Mem_Write,ALU_Src,Reg_Write,Jump , Reg_Dst , Mem_to_Reg ,JR_Signal ;
 	output reg  [3:0] ALU_Op;
-	input  wire [5:0] Inst_31_26;
+	// Opcode Field and Function Field
+	input  wire [5:0] Inst_31_26 , Inst_5_0;
 
 	initial
 	begin
@@ -248,31 +250,52 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 		Reg_Dst <= 0;
 		ALU_Op <= 0;
 		Ori <= 1'b0;
+		JR_Signal <=1'b0 ;
 	end
 
-	always@(Inst_31_26) // if any of instruction opcode changes 
+	always@(*) // if any of instruction opcode changes 
 	begin
 		
 		case(Inst_31_26)
 			6'd0:     //R-Formate
 			begin
-				Reg_Dst<=1'b1;
-				Branch<=1'b0;
-				Branch_Not_Equal<=1'b0;
-				Jump<=1'b0;
-				Mem_Read<=1'b0;
-				Mem_to_Reg<=1'b0;
-				Mem_Write<=1'b0;
-				ALU_Src<=1'b0;
-				Reg_Write<=1'b1;
-				ALU_Op<=4'b0010;
-				Ori <= 1'b0;
+				if( Inst_5_0 == 6'd8 )
+				begin	//Found to be jr instruction
+					JR_Signal <= 1'b1 ;
+					Reg_Dst<=1'b0;
+					Branch<=1'b0;
+					Branch_Not_Equal<=1'b0;
+					Jump<=1'b1; //Set Jump so that it sends to hazard unit to flush next instruction
+					Mem_Read<=1'b0;
+					Mem_to_Reg<=1'b0;
+					Mem_Write<=1'b0;
+					ALU_Src<=1'b0;
+					Reg_Write<=1'b0;
+					ALU_Op<=4'b0000;
+					Ori <= 1'b0;
+				end
+				else
+				begin
+					JR_Signal <=1'b0;
+					Reg_Dst<=1'b1;
+					Branch<=1'b0;
+					Branch_Not_Equal<=1'b0;
+					Jump<=1'b0;
+					Mem_Read<=1'b0;
+					Mem_to_Reg<=1'b0;
+					Mem_Write<=1'b0;
+					ALU_Src<=1'b0;
+					Reg_Write<=1'b1;
+					ALU_Op<=4'b0010;
+					Ori <= 1'b0;
+				end
 			end
 			6'd2:	//jump
 			begin
 				Reg_Dst<=1'bx;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
+				JR_Signal <=1'b0;
 				Jump<=1'b1;
 				Mem_Read<=1'b0;
 				Mem_to_Reg<=1'bx;
@@ -298,6 +321,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end*/
 			6'd4:	//beq
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b1;
 				Branch_Not_Equal<=1'b0;
@@ -312,6 +336,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end
 			6'd5:	//bne
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b1;
@@ -326,6 +351,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end
 			6'd8: 	//addi
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -340,6 +366,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end
 			6'd10:	//slti
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -354,6 +381,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end
 			6'd11:	//sgti
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -368,6 +396,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end
 			6'd12:	//andi
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -382,6 +411,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end
 			6'd13:	//ori
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -396,6 +426,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end		
 			6'd14:	//xori
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -410,6 +441,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end
 			6'd15:	//lui
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -424,6 +456,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end
 			6'd32:	//lb
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -438,6 +471,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end
 			6'd33:	//lh
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -452,6 +486,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end
 			6'd35:     //lw
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -494,6 +529,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end*/
 			6'd43:  //sw
 			begin
+				JR_Signal <=1'b0;
 				Reg_Dst<=1'bx;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -508,6 +544,7 @@ module CONTROL(Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg ,
 			end	
 			default : 
 			begin
+				JR_Signal <=1'b0;
 				Branch <= 0;
 				Jump <= 0 ;
 				Branch_Not_Equal <= 0;
@@ -770,10 +807,9 @@ module ALU(alu_result, inst_10_6, read_data_1, alu_mux_output, alu_ctrl);
 		endcase
 	end
 endmodule
-module ALU_CONTROL(alu_ctrl, alu_op, inst_5_0);//jr signal
+module ALU_CONTROL(alu_ctrl, alu_op, inst_5_0);
 	
 	output reg[3:0] alu_ctrl;	 //signal going to ALU can be modified to more bits when adding more instr 
-	//output reg JR_Signal;
 	input wire[3:0] alu_op; 	//coming from control unit
 	input wire[5:0] inst_5_0;  	//funct field in instr
 
@@ -781,63 +817,56 @@ module ALU_CONTROL(alu_ctrl, alu_op, inst_5_0);//jr signal
 	begin                         	//operations are executed from begining;
 		if(alu_op==4'b0000)	//sw or lw --> add or addi
 		begin
-			//JR_Signal <= 1'b0;
+			
 			alu_ctrl <= 4'b0010; 
 		end
 
 		else if(alu_op==4'b0001) // sub for beq
 		begin
-			//JR_Signal <= 1'b0;
+			
 			alu_ctrl <= 4'b0110;
 		end
 		
 		else if(alu_op==4'b1000) // new sgti
 		begin
 			
-			//JR_Signal <= 1'b0;
+			
 			alu_ctrl <= 4'b0101;
 		end
 
 		else if(alu_op==4'b0011) // andi
 		begin
-			//JR_Signal <= 1'b0;
+			
 			alu_ctrl <= 4'b0000;
 		end
 
 		else if(alu_op==4'b0100) // ori
 		begin
-			//JR_Signal <= 1'b0;
+			
 			alu_ctrl <= 4'b0001;
 		end
 
 		else if(alu_op==4'b0101) // slti
 		begin
-			//JR_Signal <= 1'b0;
+			
 			alu_ctrl <= 4'b0111;
 		end
 
 		else if(alu_op==4'b0110) // xori
 		begin
-			//JR_Signal <= 1'b0;
+			
 			alu_ctrl <= 4'b0011;
 		end
 
 		else if(alu_op==4'b0111) // lui
 		begin
-			//JR_Signal <= 1'b0;
+			
 			alu_ctrl <= 4'b1010;
 		end
 
 		else if(alu_op==4'b0010)   //Incase (010) indicate we have R_FORMATE inst; 
 		begin                    //so we diffrentiate using funct field in instr;
-			if(inst_5_0==6'b001000)
-			begin
-				alu_ctrl <= 4'b0000;
-				//JR_Signal <= 1'b1;
-			end
-			else
-			begin
-				//JR_Signal <= 1'b0;
+
 				case (inst_5_0)
 					6'b000000:alu_ctrl <= 4'b0100;  //sll
 					6'b000001:alu_ctrl <= 4'b0101;	//sgt
@@ -852,12 +881,10 @@ module ALU_CONTROL(alu_ctrl, alu_op, inst_5_0);//jr signal
 					6'b100111:alu_ctrl <= 4'b1100;  //nor
 					default  :alu_ctrl <= 4'b0000; 
 				endcase
-			end
 		end
 		else
 		begin
 			alu_ctrl <= 4'b0000;
-			//JR_Signal <= 1'b0;
 		end
 	end
 endmodule
@@ -1196,32 +1223,20 @@ endmodule
 module Pipeline_MIPS();
 
 /*=============================================================== WIRES =================================================================*/
-wire Clock;
-wire [31:0] instruction , pcIn , pcOut , pc_branch_mux_output , inst_IF_Out , PCplus4_IF_Out, jump_mux_output ;
-wire [31:0] Read_Data_1 , Read_Data_2 ;
-wire Zero;
+wire Clock, gui_flush, gui_hold, Zero, JR_Signal, Ori, Reg_Dstn, Branch, Branch_Not_Equal, Mem_Read, Mem_to_Reg, Mem_Write, ALU_Src, Reg_Write, Jump, ex_mem_reg_write, ex_mem_memtoreg, ex_mem_mem_write, ex_mem_mem_read, mem_wb_reg_write, mem_wb_memtoreg, flagout, flagin, eof;
+wire [31:0] instruction, pcIn, pcOut, pc_branch_mux_output, inst_IF_Out, PCplus4_IF_Out, jump_mux_output, jr_mux_output, Read_Data_1, Read_Data_2, Sign_Ext_Output, branch_adder_output, jump_address_output ;
 wire [3:0] ALU_Op;
-wire Ori , Reg_Dstn, Branch, Branch_Not_Equal, Mem_Read, Mem_to_Reg , Mem_Write , ALU_Src , Reg_Write , Jump ;
-wire [31:0] Sign_Ext_Output,branch_adder_output,jump_address_output ;
-wire beq_and_output,bne_not_output,bne_and_output,branch_or_output;
-wire [31:0] comp_upper_mux_out , comp_lower_mux_out ;
+wire beq_and_output, bne_not_output, bne_and_output, branch_or_output, hazard_mux_selector , hold_pc , hold_if_id_reg ,IF_Flush, id_ex_reg_write, id_ex_memtoreg, id_ex_mem_write, id_ex_mem_read,id_ex_alu_src, id_ex_regdst;
+wire [31:0] comp_upper_mux_out , comp_lower_mux_out, id_ex_Sign_Ext_Output, id_ex_read_data1, id_ex_read_data2, Alu_Result, alu_lower_mux_out, alu_upper_mux_out, alu_src_mux_Output, Read_Data, mem_wb_mux_output, mem_wb_read_data, mem_wb_alu_result, ex_mem_alu_result, ex_mem_lower_mux_out;
 wire[1:0] Comp_Mux_1 , Comp_Mux_2 ;
-wire 	    hazard_mux_selector , hold_pc , hold_if_id_reg ,IF_Flush ;
 wire[9:0]   hazard_mux_output ;
-wire id_ex_reg_write, id_ex_memtoreg,id_ex_mem_write, id_ex_mem_read,id_ex_alu_src,id_ex_regdst;
-wire [31:0] id_ex_Sign_Ext_Output,id_ex_read_data1,id_ex_read_data2;
 wire [3:0]  id_ex_aluop;
 wire [4:0]  id_ex_rs,id_ex_rt,id_ex_rd,shift_amount;
 wire [5:0]  id_ex_func_field ;
-wire [31:0] Alu_Result,alu_lower_mux_out,alu_upper_mux_out,alu_src_mux_Output;
 wire [3:0]  alu_ctrl;
 wire [1:0]  upper_mux_forward,lower_mux_forward;
-wire [4:0]  regdst_mux_out,ex_mem_dstreg;
-wire [31:0] ex_mem_alu_result,ex_mem_lower_mux_out;
-wire ex_mem_reg_write, ex_mem_memtoreg,ex_mem_mem_write,ex_mem_mem_read;
-wire [31:0] Read_Data , mem_wb_mux_output , mem_wb_read_data , mem_wb_alu_reslut ;
-wire [4:0]  mem_wb_dstreg ;
-wire        mem_wb_reg_write , mem_wb_memtoreg,flagout, flagin, eof ;
+wire [4:0]  regdst_mux_out,ex_mem_dstreg, mem_wb_dstreg;
+
 /*=======================================================================================================================================*/
 
 /**********CLOCK*******/
@@ -1231,7 +1246,7 @@ CLOCK myClock(Clock);
 /*======================================================== IF STAGE + IF/ID REGISTER ======================================================*/
 
 /***** PC & PC ADDER *****/ 
-PC pc( pcOut , jump_mux_output , Clock , hold_pc, eof );
+PC pc( pcOut , jr_mux_output , Clock , hold_pc, eof );
 PC_ADDER pc_adder( pcIn , pcOut);
 /***********************/
 
@@ -1245,6 +1260,7 @@ MUX_32_1 pc_branch_mux( pc_branch_mux_output , pcIn , branch_adder_output, branc
 
 /*********** JUMP MUX **************/
 MUX_32_1 jump_mux(jump_mux_output,pc_branch_mux_output,jump_address_output, Jump);
+MUX_32_1 jr_mux(jr_mux_output , jump_mux_output , Read_Data_1 , JR_Signal ); //WARNING YA SERsssssSY Jump and JR_Signal both are set to 1 if only jr inst comes since I want to flush the next inst by jump signal that is input to hazard unit
 /***********************************/
 
 /******IF/ID REGISTER**************/
@@ -1271,7 +1287,7 @@ MUX_32_2 comp_lower_mux(comp_lower_mux_out ,Read_Data_2,ex_mem_alu_result,mem_wb
 /**********************************/
 
 /**************CONTROLLER**********/
-CONTROL control_unit( Ori , Reg_Dstn, Branch, Branch_Not_Equal, Mem_Read, Mem_to_Reg, ALU_Op , Mem_Write , ALU_Src , Reg_Write , Jump , inst_IF_Out[31:26] ); 
+CONTROL control_unit( JR_Signal , Ori , Reg_Dstn, Branch, Branch_Not_Equal, Mem_Read, Mem_to_Reg, ALU_Op , Mem_Write , ALU_Src , Reg_Write , Jump , inst_IF_Out[31:26] ,inst_IF_Out[5:0]); 
 /**********************************/
 
 /***************SIGN EXTEND *******/
@@ -1322,13 +1338,12 @@ EX_MemReg ex_mem_reg (Clock,id_ex_reg_write, id_ex_memtoreg,id_ex_mem_write, id_
 
 DATA_MEMORY data_memory( Read_Data , ex_mem_mem_write , ex_mem_mem_read , ex_mem_alu_result[12:0] , ex_mem_lower_mux_out , Clock , eof, pcOut);
 
-Mem_WbReg mem_wb_reg(ex_mem_reg_write , ex_mem_memtoreg , ex_mem_alu_result ,  Clock , Read_Data  , ex_mem_dstreg ,mem_wb_reg_write , mem_wb_memtoreg , mem_wb_read_data , mem_wb_alu_reslut , mem_wb_dstreg );
-MUX_32_1 mem_wb_mux(mem_wb_mux_output , mem_wb_alu_reslut , mem_wb_read_data , mem_wb_memtoreg );
+Mem_WbReg mem_wb_reg(ex_mem_reg_write , ex_mem_memtoreg , ex_mem_alu_result ,  Clock , Read_Data  , ex_mem_dstreg ,mem_wb_reg_write , mem_wb_memtoreg , mem_wb_read_data , mem_wb_alu_result , mem_wb_dstreg );
+MUX_32_1 mem_wb_mux(mem_wb_mux_output , mem_wb_alu_result , mem_wb_read_data , mem_wb_memtoreg );
 
 /*******************************WIRES*******************************/
 
 /*=======================================================================================================================================*/
-wire gui_flush, gui_hold;
 stall_or_flush ray2(IF_Flush, hold_pc, gui_flush, gui_hold, Clock);
 
 integer file;
@@ -1336,16 +1351,13 @@ always @(negedge Clock)
 begin
 
 file = $fopen("pc.txt");
-$fwrite(file,"%0d,%0d,%0d %0d,%0d,%0d,%0d\n",pcOut, gui_hold,gui_flush,Jump,upper_mux_forward,lower_mux_forward,mem_wb_memtoreg);
+$fwrite(file,"%0d,%0d,%0d %0d,%0d,%0d,%0d\n",pcOut, gui_hold,gui_flush,branch_or_output,upper_mux_forward,lower_mux_forward,mem_wb_memtoreg);
 end
 /*
-
 not jr_not(jr_not_output, JR_Signal);
 and jr_and(jr_and_output, Reg_Write, jr_not_output);
 MUX_32_1 jr_mux(jr_mux_output, jump_mux_output, Read_Data_1, JR_Signal);
 */
-
-
 
 initial
 begin

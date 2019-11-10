@@ -1,11 +1,6 @@
 addi $s0,$s0,1
 addi $s1,$s1,1
-addi $s2,$s2,1
-addi $s4,$s4,3
-for1:
-beq $s0,$s4,Exit
+beq $s0,$s1,Exit
 addi $s0,$s0,1
-addi $s3,$s3,1
-addi $s2,$s2,1
-j for1
 Exit:
+addi $s3,$s3,1
