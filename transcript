@@ -2,7 +2,7 @@
 # OpenFile C:/Pipeline/Pipeline.v
 vlog -reportprogress 300 -work work C:/Pipeline/Pipeline.v
 # Model Technology ModelSim - Intel FPGA Edition vlog 10.5c Compiler 2017.01 Jan 23 2017
-# Start time: 21:32:40 on Nov 09,2019
+# Start time: 11:18:53 on Nov 12,2019
 # vlog -reportprogress 300 -work work C:/Pipeline/Pipeline.v 
 # -- Compiling module CLOCK
 # -- Compiling module PC
@@ -35,12 +35,102 @@ vlog -reportprogress 300 -work work C:/Pipeline/Pipeline.v
 # Top level modules:
 # 	Reg_Dst_MUX
 # 	Pipeline_MIPS
-# End time: 21:32:40 on Nov 09,2019, Elapsed time: 0:00:00
+# End time: 11:18:54 on Nov 12,2019, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
-vlog -reportprogress 30 -work work C:/Pipeline/Pipeline.v
+vsim -gui work.Pipeline_MIPS
+# vsim -gui work.Pipeline_MIPS 
+# Start time: 11:19:11 on Nov 12,2019
+# Loading work.Pipeline_MIPS
+# Loading work.CLOCK
+# Loading work.PC
+# Loading work.PC_ADDER
+# Loading work.INS_MEMORY
+# Loading work.MUX_32_1
+# Loading work.IF_ID_Reg
+# Loading work.REG_FILE
+# Loading work.JUMP_ADDRESS
+# Loading work.Comparator
+# Loading work.MUX_32_2
+# Loading work.CONTROL
+# Loading work.SIGN_EXTEND
+# Loading work.BR_ADDER
+# Loading work.ID_Forwarding_Unit
+# Loading work.HazardDetectionUnit
+# Loading work.Hazard_MUX_10_1
+# Loading work.ID_EX_reg
+# Loading work.ALU
+# Loading work.ALU_CONTROL
+# Loading work.Forwarding_Unit_EX
+# Loading work.MUX_5_1
+# Loading work.EX_MemReg
+# Loading work.DATA_MEMORY
+# Loading work.Mem_WbReg
+# Loading work.stall_or_flush
+run
+# SIZE ===           7 
+# ***************** 0 *******************
+#  pcOut=00000000, pcIn:00000001, instruction: 21080005 ***************************************
+# ***************** 1 *******************
+#  pcOut=00000001, pcIn:00000002, instruction: 21080005 ***************************************
+# ***************** 0 *******************
+#  pcOut=00000001, pcIn:00000002, instruction: 21290016 ***************************************
+# ***************** 1 *******************
+#  pcOut=00000002, pcIn:00000003, instruction: 21290016 ***************************************
+# ***************** 0 *******************
+#  pcOut=00000002, pcIn:00000003, instruction: 21080005 ***************************************
+# ***************** 1 *******************
+#  pcOut=00000003, pcIn:00000004, instruction: 21080005 ***************************************
+# ***************** 0 *******************
+#  pcOut=00000003, pcIn:00000004, instruction: 21290016 ***************************************
+# ***************** 1 *******************
+#  pcOut=00000004, pcIn:00000005, instruction: 21290016 ***************************************
+# ***************** 0 *******************
+#  pcOut=00000004, pcIn:00000005, instruction: 21080005 ***************************************
+# ***************** 1 *******************
+#  pcOut=00000005, pcIn:00000006, instruction: 21080005 ***************************************
+# ***************** 0 *******************
+#  pcOut=00000005, pcIn:00000006, instruction: 21290016 ***************************************
+# ***************** 1 *******************
+#  pcOut=00000006, pcIn:00000007, instruction: 21290016 ***************************************
+# ***************** 0 *******************
+#  pcOut=00000006, pcIn:00000007, instruction: xxxxxxxx ***************************************
+# ***************** 1 *******************
+#  pcOut=00000007, pcIn:00000008, instruction: xxxxxxxx ***************************************
+# ***************** 0 *******************
+#  pcOut=00000007, pcIn:00000008, instruction: xxxxxxxx ***************************************
+# ***************** 1 *******************
+#  pcOut=00000008, pcIn:00000009, instruction: xxxxxxxx ***************************************
+# ***************** 0 *******************
+#  pcOut=00000008, pcIn:00000009, instruction: xxxxxxxx ***************************************
+# ***************** 1 *******************
+#  pcOut=00000009, pcIn:0000000a, instruction: xxxxxxxx ***************************************
+# ***************** 0 *******************
+#  pcOut=00000009, pcIn:0000000a, instruction: xxxxxxxx ***************************************
+# ***************** 1 *******************
+#  pcOut=0000000a, pcIn:0000000b, instruction: xxxxxxxx ***************************************
+# ***************** 0 *******************
+#  pcOut=0000000a, pcIn:0000000b, instruction: xxxxxxxx ***************************************
+# ***************** 1 *******************
+#  pcOut=0000000b, pcIn:0000000c, instruction: xxxxxxxx ***************************************
+# ***************** 0 *******************
+#  pcOut=0000000b, pcIn:0000000c, instruction: xxxxxxxx ***************************************
+# ***************** 1 *******************
+#  pcOut=0000000c, pcIn:0000000d, instruction: xxxxxxxx ***************************************
+# ***************** 0 *******************
+#  pcOut=0000000c, pcIn:0000000d, instruction: xxxxxxxx ***************************************
+# ***************** 1 *******************
+#  pcOut=0000000d, pcIn:0000000e, instruction: xxxxxxxx ***************************************
+# ***************** 0 *******************
+#  pcOut=0000000d, pcIn:0000000e, instruction: xxxxxxxx ***************************************
+# end_program will save the memory data and exit the verilog program 
+# ** Note: $finish    : C:/Pipeline/Pipeline.v(1020)
+#    Time: 837 ns  Iteration: 3  Instance: /Pipeline_MIPS/data_memory
+# 1
+# Break in Module DATA_MEMORY at C:/Pipeline/Pipeline.v line 1020
+vlog -reportprogress 300 -work work C:/Pipeline/Pipeline.v
 # Model Technology ModelSim - Intel FPGA Edition vlog 10.5c Compiler 2017.01 Jan 23 2017
-# Start time: 21:32:42 on Nov 09,2019
-# vlog -reportprogress 30 -work work C:/Pipeline/Pipeline.v 
+# Start time: 11:20:26 on Nov 12,2019
+# vlog -reportprogress 300 -work work C:/Pipeline/Pipeline.v 
 # -- Compiling module CLOCK
 # -- Compiling module PC
 # -- Compiling module PC_ADDER
@@ -52,25 +142,3 @@ vlog -reportprogress 30 -work work C:/Pipeline/Pipeline.v
 # -- Compiling module HazardDetectionUnit
 # -- Compiling module CONTROL
 # -- Compiling module BR_ADDER
-# -- Compiling module JUMP_ADDRESS
-# -- Compiling module ID_Forwarding_Unit
-# -- Compiling module ID_EX_reg
-# -- Compiling module ALU
-# -- Compiling module ALU_CONTROL
-# -- Compiling module Forwarding_Unit_EX
-# -- Compiling module EX_MemReg
-# -- Compiling module DATA_MEMORY
-# -- Compiling module Mem_WbReg
-# -- Compiling module MUX_32_1
-# -- Compiling module MUX_32_2
-# -- Compiling module MUX_5_1
-# -- Compiling module Hazard_MUX_10_1
-# -- Compiling module Reg_Dst_MUX
-# -- Compiling module stall_or_flush
-# -- Compiling module Pipeline_MIPS
-# 
-# Top level modules:
-# 	Reg_Dst_MUX
-# 	Pipeline_MIPS
-# End time: 21:32:42 on Nov 09,2019, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0

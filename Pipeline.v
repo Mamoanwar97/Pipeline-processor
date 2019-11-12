@@ -1342,19 +1342,20 @@ MUX_32_1 mem_wb_mux(mem_wb_mux_output , mem_wb_alu_result , mem_wb_read_data , m
 /*=======================================================================================================================================*/
 stall_or_flush ray2(IF_Flush, hold_pc, gui_flush, gui_hold, Clock);
 
-integer file;
+integer file, pipeRegs;
 always @(negedge Clock)
 begin
-
+pipeRegs = $fopen("regs.txt");
 file = $fopen("pc.txt");
 $fwrite(file,"%0d,%0d,%0d %0d,%0d,%0d,%0d\n",pcOut, gui_hold,gui_flush,branch_or_output,upper_mux_forward,lower_mux_forward,mem_wb_memtoreg);
+$fwrite(pipeRegs,"%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d\n",inst_IF_Out,id_ex_reg_write,id_ex_memtoreg,id_ex_mem_write,id_ex_mem_read,id_ex_alu_src,id_ex_regdst,id_ex_aluop,id_ex_read_data1,id_ex_read_data2,shift_amount,id_ex_Sign_Ext_Output,id_ex_rs,id_ex_rt,id_ex_rd ,id_ex_func_field,ex_mem_reg_write, ex_mem_memtoreg,ex_mem_mem_write
+			,ex_mem_mem_read,ex_mem_alu_result,ex_mem_lower_mux_out,ex_mem_dstreg,mem_wb_reg_write , mem_wb_memtoreg , mem_wb_read_data , mem_wb_alu_result , mem_wb_dstreg );
 end
 /*
 not jr_not(jr_not_output, JR_Signal);
 and jr_and(jr_and_output, Reg_Write, jr_not_output);
 MUX_32_1 jr_mux(jr_mux_output, jump_mux_output, Read_Data_1, JR_Signal);
 */
-
 initial
 begin
 $monitor("***************** %b *******************\n pcOut=%h, pcIn:%h, instruction: %h ***************************************",Clock,pcOut,pcIn,instruction);
