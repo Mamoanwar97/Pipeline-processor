@@ -1,4 +1,3 @@
-
 `timescale 1ns / 1ns
 module CLOCK(Clock);
 	output reg Clock;
@@ -110,10 +109,12 @@ module REG_FILE(Read_Data_1, Read_Data_2, Read_Reg_1, Read_Reg_2, Write_Reg, Wri
 				Reg_File[j] <= 32'h00001FFF; // stack pointer
 			else
 				Reg_File[j]  <= 32'h00000000;
-			end
+		end
+/*****************************************************************/
 		file2 = $fopen ("regFile.txt","w");
 		$fwrite(file2,"");
 		$fclose(file2); 
+/*****************************************************************/
 	end
 
 	always @(*)
@@ -121,26 +122,23 @@ module REG_FILE(Read_Data_1, Read_Data_2, Read_Reg_1, Read_Reg_2, Write_Reg, Wri
 		Read_Data_1 = Reg_File[Read_Reg_1];
 		Read_Data_2 = Reg_File[Read_Reg_2];
 	end
-	
 	always @(negedge Clock)
 	begin
 		if(Reg_Write)
 		begin
 			Reg_File[Write_Reg] <= Write_Data;
-			
 		end
-			file2 = $fopen ("regFile.txt","a");
-			for ( k = 0; k < 32 ; k = k+1)
-			begin
+/*****************************************************************/
+		file2 = $fopen ("regFile.txt","a");
+		for ( k = 0; k < 32 ; k = k+1)
+		begin
 			if ( Reg_File[k] !== 'hxxxx )
 				$fwrite(file2,"%0d,%0d ",k,Reg_File[k]);
-			end
-
-				$fwrite(file2,"\n");
-				$fclose(file2); 
-		
-	end
-
+		end
+		$fwrite(file2,"\n");
+		$fclose(file2); 
+/*****************************************************************/
+	 end
 endmodule 
 module Comparator( Zero , read_data1 , read_data2 );
 
@@ -171,6 +169,7 @@ module SIGN_EXTEND(Sign_Ext_Output, Ori, Inst_15_0);
 	end
 endmodule
 module HazardDetectionUnit( ID_ExMemRead ,  ID_Ex_RegDst , IF_ID_Instr , holdPC , holdIF_ID , IF_ID_Flush , Branch_And_Output ,muxSelector, flagout, flagin , Jump );
+	
 	output reg          holdPC , holdIF_ID , muxSelector , IF_ID_Flush,flagout ;
 	input wire[4:0] ID_Ex_RegDst ;
  	input wire[31:0] IF_ID_Instr ;
@@ -189,36 +188,35 @@ module HazardDetectionUnit( ID_ExMemRead ,  ID_Ex_RegDst , IF_ID_Instr , holdPC 
 		holdPC <=0;       
 		holdIF_ID<=0;
               	muxSelector<=0;
-	if(flagin == 1)
-	begin
-			holdPC<=1;
-             		holdIF_ID<=1;
-              		muxSelector<=1;
-			flagout<=0;
-	end
-	else
-	begin
-		if ( ( IF_ID_Instr [31:26] != 6'b000100 || IF_ID_Instr [31:26] != 6'b000101  )&& ID_ExMemRead && ( ID_Ex_RegDst == IF_ID_Instr[25:21] || ID_Ex_RegDst == IF_ID_Instr[20:16]) )  // lw + ay 7aga 8ir beq -> stall
+		if(flagin == 1)
 		begin
 			holdPC<=1;
              		holdIF_ID<=1;
               		muxSelector<=1;
-        	end
-      		else if( ( IF_ID_Instr [31:26] == 6'b000100 || IF_ID_Instr [31:26] ==  6'b000101 ) && ( ID_Ex_RegDst == IF_ID_Instr[25:21] || ID_Ex_RegDst == IF_ID_Instr[20:16]) ) // ay 7aga 8ir lw + beq -> 1 stall
-        	begin
-			holdPC<=1;
-             		holdIF_ID<=1;
-              		muxSelector<=1;
-        	end
-		else if(( IF_ID_Instr [31:26] == 6'b000100 || IF_ID_Instr [31:26] ==  6'b000101 ) && ID_ExMemRead && ( ID_Ex_RegDst == IF_ID_Instr[25:21] || ID_Ex_RegDst == IF_ID_Instr[20:16]) )//stalling0 twice //first stall
-        	begin                                                                                                                    		 //lw +beq
-          		
-			holdPC<=1;
-             		holdIF_ID<=1;
-              		muxSelector<=1;
-			flagout<=1;
-        	end	
-        end                 
+			flagout<=0;
+		end
+		else
+		begin
+			if ( ( IF_ID_Instr [31:26] != 6'b000100 || IF_ID_Instr [31:26] != 6'b000101  )&& ID_ExMemRead && ( ID_Ex_RegDst == IF_ID_Instr[25:21] || ID_Ex_RegDst == IF_ID_Instr[20:16]) )  // lw + ay 7aga 8ir beq -> stall
+			begin
+				holdPC<=1;
+             			holdIF_ID<=1;
+              			muxSelector<=1;
+        		end
+      			else if( ( IF_ID_Instr [31:26] == 6'b000100 || IF_ID_Instr [31:26] ==  6'b000101 ) && ( ID_Ex_RegDst == IF_ID_Instr[25:21] || ID_Ex_RegDst == IF_ID_Instr[20:16]) ) // ay 7aga 8ir lw + beq -> 1 stall
+        		begin
+				holdPC<=1;
+             			holdIF_ID<=1;
+              			muxSelector<=1;
+        		end
+			else if(( IF_ID_Instr [31:26] == 6'b000100 || IF_ID_Instr [31:26] ==  6'b000101 ) && ID_ExMemRead && ( ID_Ex_RegDst == IF_ID_Instr[25:21] || ID_Ex_RegDst == IF_ID_Instr[20:16]) )//stalling0 twice //first stall
+        		begin                                                                                                                    		 //lw +beq
+				holdPC<=1;
+             			holdIF_ID<=1;
+              			muxSelector<=1;
+				flagout<=1;
+        		end	
+        	end                 
 		/*========================= Set Flush When Found Branch or Jump ================*/
 		if( ( ( IF_ID_Instr [31:26] == 6'b000100 || IF_ID_Instr [31:26] ==  6'b000101 ) &&  Branch_And_Output ) || Jump  ) 
 		begin
@@ -231,14 +229,15 @@ module HazardDetectionUnit( ID_ExMemRead ,  ID_Ex_RegDst , IF_ID_Instr , holdPC 
 		/*===============================================================================*/
     	end
 endmodule
-module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg , ALU_Op , Mem_Write , ALU_Src , Reg_Write , Jump, Inst_31_26, Inst_5_0 );
-	output reg  Ori,Branch,Branch_Not_Equal,Mem_Read,Mem_Write,ALU_Src,Reg_Write,Jump , Reg_Dst , Mem_to_Reg ,JR_Signal ;
+module CONTROL( JAL_Signal ,JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read ,Mem_to_Reg , ALU_Op , Mem_Write , ALU_Src , Reg_Write , Jump, Inst_31_26, Inst_5_0 );
+	
+	output reg  Ori,Branch,Branch_Not_Equal,Mem_Read,Mem_Write,ALU_Src,Reg_Write,Jump , Reg_Dst , Mem_to_Reg ,JR_Signal ,JAL_Signal;
 	output reg  [3:0] ALU_Op;
-	// Opcode Field and Function Field
-	input  wire [5:0] Inst_31_26 , Inst_5_0;
+	input  wire [5:0] Inst_31_26 , Inst_5_0; // Opcode Field and Function Field 
 
 	initial
 	begin
+		JAL_Signal <=0 ;
 		Branch <= 0;
 		Jump <= 0 ;
 		Branch_Not_Equal <= 0;
@@ -252,16 +251,15 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 		Ori <= 1'b0;
 		JR_Signal <=1'b0 ;
 	end
-
 	always@(*) // if any of instruction opcode changes 
 	begin
-		
 		case(Inst_31_26)
 			6'd0:     //R-Formate
 			begin
 				if( Inst_5_0 == 6'd8 )
 				begin	//Found to be jr instruction
 					JR_Signal <= 1'b1 ;
+					JAL_Signal <=1'b0 ;
 					Reg_Dst<=1'b0;
 					Branch<=1'b0;
 					Branch_Not_Equal<=1'b0;
@@ -276,7 +274,8 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 				end
 				else
 				begin
-					JR_Signal <=1'b0;
+					JR_Signal <= 1'b0;
+					JAL_Signal <=1'b0 ;
 					Reg_Dst<=1'b1;
 					Branch<=1'b0;
 					Branch_Not_Equal<=1'b0;
@@ -292,6 +291,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd2:	//jump
 			begin
+				JAL_Signal <=1'b0 ;
 				Reg_Dst<=1'bx;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
@@ -305,22 +305,25 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 				ALU_Op<=4'b0xxx;
 				Ori <= 1'b0;
 			end	
-			/*6'd3:	//jal
+			6'd3:	//jal
 			begin
-				Reg_Dst<='b10;
+				JAL_Signal <=1'b1 ;
+				JR_Signal <=1'b0;
+				Reg_Dst<=1'b1;
 				Branch<=1'b0;
 				Branch_Not_Equal<=1'b0;
 				Jump<=1'b1;
 				Mem_Read<=1'b0;
-				Mem_to_Reg<=2'b10;
+				Mem_to_Reg<=1'b0;
 				Mem_Write<=1'b0;
-				ALU_Src<=1'bx;
+				ALU_Src<=1'b0;
 				Reg_Write<=1'b1;
-				ALU_Op<=4'b0xxx;
+				ALU_Op<=4'b0000;
 				Ori <= 1'b0;
-			end*/
+			end
 			6'd4:	//beq
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b1;
@@ -336,6 +339,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd5:	//bne
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -351,6 +355,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd8: 	//addi
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -366,6 +371,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd10:	//slti
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -381,6 +387,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd11:	//sgti
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -396,6 +403,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd12:	//andi
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -411,6 +419,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd13:	//ori
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -426,6 +435,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end		
 			6'd14:	//xori
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -441,6 +451,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd15:	//lui
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -456,6 +467,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd32:	//lb
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -471,6 +483,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd33:	//lh
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -486,6 +499,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end
 			6'd35:     //lw
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'b0;
 				Branch<=1'b0;
@@ -529,6 +543,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end*/
 			6'd43:  //sw
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Reg_Dst<=1'bx;
 				Branch<=1'b0;
@@ -544,6 +559,7 @@ module CONTROL( JR_Signal , Ori , Reg_Dst , Branch , Branch_Not_Equal, Mem_Read 
 			end	
 			default : 
 			begin
+				JAL_Signal <=1'b0 ;
 				JR_Signal <=1'b0;
 				Branch <= 0;
 				Jump <= 0 ;
@@ -619,17 +635,17 @@ module ID_Forwarding_Unit( Comp_Mux_1 , Comp_Mux_2 , Branch , Branch_Not_Equal, 
 				Comp_Mux_2 <= 2'b01;
 			else if ( (Mem_WB_Write && Mem_WB_DestReg!=0 && Branch) || (Mem_WB_Write && Mem_WB_DestReg!=0 &&Branch_Not_Equal)) 
 			begin
-			if ( (Mem_WB_DestReg ==  IF_ID_Rs) && (Mem_WB_DestReg ==  IF_ID_Rt) ) //beq s1,s1,L1
-			begin
-				Comp_Mux_1 <= 2'b10;
-				Comp_Mux_2 <= 2'b10;
+				if ( (Mem_WB_DestReg ==  IF_ID_Rs) && (Mem_WB_DestReg ==  IF_ID_Rt) ) //beq s1,s1,L1
+				begin
+					Comp_Mux_1 <= 2'b10;
+					Comp_Mux_2 <= 2'b10;
+				end
+				else if( Mem_WB_DestReg ==  IF_ID_Rs )
+					Comp_Mux_1 <= 2'b10;
+				else if( Mem_WB_DestReg ==  IF_ID_Rt)
+					Comp_Mux_2 <= 2'b10;
 			end
-			else if( Mem_WB_DestReg ==  IF_ID_Rs )
-				Comp_Mux_1 <= 2'b10;
-			else if( Mem_WB_DestReg ==  IF_ID_Rt)
-				Comp_Mux_2 <= 2'b10;
-			end
-			end
+		end
 		else if( (Mem_WB_Write && Mem_WB_DestReg!=0 && Branch) || (Mem_WB_Write && Mem_WB_DestReg!=0 &&Branch_Not_Equal))
 		begin
 			if ( (Mem_WB_DestReg ==  IF_ID_Rs) && (Mem_WB_DestReg ==  IF_ID_Rt) ) //beq s1,s1,L1
@@ -666,12 +682,11 @@ module ID_Forwarding_Unit( Comp_Mux_1 , Comp_Mux_2 , Branch , Branch_Not_Equal, 
 		end
 end
 endmodule
-
-module ID_EX_reg ( Reg_Write , Mem_to_Reg , Mem_Write , Mem_Read , ALU_Src , Reg_Dst , ALU_Op , Read_Data1_Out ,  Read_Data2_Out , shift_amount_out , Sign_Ext_out ,rs , rt , rd , func_field ,control_signal,Read_Data1,Read_Data2,Sign_Ext,IF_Inst,clk); //control unit input 
+module ID_EX_reg ( jal_signal ,Reg_Write , Mem_to_Reg , Mem_Write , Mem_Read , ALU_Src , Reg_Dst , ALU_Op , Read_Data1_Out ,  Read_Data2_Out , shift_amount_out , Sign_Ext_out ,rs , rt , rd , func_field ,control_signal,Read_Data1,Read_Data2,Sign_Ext,IF_Inst,clk); //control unit input 
   
   input wire [9:0] control_signal ;
   input wire [31:0] Read_Data1,Read_Data2 ,Sign_Ext,IF_Inst;
-  input wire clk; 
+  input wire clk, jal_signal; 
   output reg Reg_Write , Mem_to_Reg , Mem_Write , Mem_Read , ALU_Src , Reg_Dst ;
   output reg [3:0]  ALU_Op;
   output reg [31:0] Read_Data1_Out ,  Read_Data2_Out ,  Sign_Ext_out;
@@ -693,7 +708,14 @@ module ID_EX_reg ( Reg_Write , Mem_to_Reg , Mem_Write , Mem_Read , ALU_Src , Reg
     shift_amount_out <= IF_Inst[10:6];
     rs <= IF_Inst[25:21];
     rt <= IF_Inst[20:16];
-    rd <= IF_Inst[15:11];
+    if(jal_signal==0) // sends ra address in rd field
+    begin
+    	rd <= IF_Inst[15:11];
+    end
+    else
+    begin
+	rd <= 5'd31 ;
+     end
     func_field <=  IF_Inst[5:0];
     end
 endmodule
@@ -813,7 +835,7 @@ module ALU_CONTROL(alu_ctrl, alu_op, inst_5_0);
 	input wire[3:0] alu_op; 	//coming from control unit
 	input wire[5:0] inst_5_0;  	//funct field in instr
 
-	always @(*)  	//to make sure when any input change;
+	always @(*)  			//to make sure when any input change;
 	begin                         	//operations are executed from begining;
 		if(alu_op==4'b0000)	//sw or lw --> add or addi
 		begin
@@ -975,10 +997,10 @@ module Forwarding_Unit_EX(ID_EX_rs,ID_EX_rt,EX_MEM_register_destination,MEM_WB_r
 		end
 end
 endmodule
-module EX_MemReg (clk,RegWrite, MemtoReg,MemWrite, MemRead,ALUresult,writedata,writeReg,RegWriteOut, MemtoRegOut,MemWriteOut
+module EX_MemReg (jal_signal,clk,RegWrite, MemtoReg,MemWrite, MemRead,ALUresult,writedata,writeReg,RegWriteOut, MemtoRegOut,MemWriteOut
 			,MemReadOut,ALUresultOut,writedataOut,writeRegOut);
   
-  input clk;
+  input clk,jal_signal;
   input RegWrite, MemtoReg; //WB
   input MemWrite, MemRead; //MEM
   input [31:0] ALUresult,writedata; //writedata is the data in rt in case of storing in memory
@@ -1042,9 +1064,9 @@ module DATA_MEMORY(Read_Data,MemWrite,MemRead,Address,Write_data,clock,eof,pc);
 		        Read_Data <= write_data_storage[Address];
 	end
 endmodule
-module Mem_WbReg(RegWrite, MemtoReg,ALUresult,clk,readData,writeReg,RegWriteOut,MemtoRegOut,readDataOut,ALUresultOut,writeRegOut);
+module Mem_WbReg(jal_signal,RegWrite, MemtoReg,ALUresult,clk,readData,writeReg,RegWriteOut,MemtoRegOut,readDataOut,ALUresultOut,writeRegOut);
   
-  input clk;
+  input clk,jal_signal;
   input RegWrite, MemtoReg; //WB
   input [4:0] writeReg; //rt
   input [31:0] ALUresult, readData;   
@@ -1149,8 +1171,8 @@ module Hazard_MUX_10_1(output_mux,Reg_Write,Mem_to_Reg,Mem_Write,Mem_Read,ALU_Sr
 	end
 endmodule
 
-module Reg_Dst_MUX(Write_Register,in0,in1,RegDst);
-	input  wire [4:0] in0,in1;
+module Reg_Dst_MUX(Write_Register,in0,RegDst);
+	input  wire [4:0] in0;
 	input  wire [1:0] RegDst;
 	output reg  [4:0] Write_Register;
 	reg [4:0] ra;
@@ -1158,14 +1180,14 @@ module Reg_Dst_MUX(Write_Register,in0,in1,RegDst);
 	begin
 		ra = 5'd31;
 	end
-	always@(in0,in1,RegDst)
+	always@(in0,RegDst)
 	begin 
-		if (RegDst == 1)
+		if (RegDst == 0)
 		begin
-			Write_Register <= in1;
+			Write_Register <= in0;
 		end
 
-		else if (RegDst == 2)
+		else if (RegDst == 1)
 		begin
 			Write_Register <= ra;
 		end
@@ -1178,59 +1200,58 @@ module Reg_Dst_MUX(Write_Register,in0,in1,RegDst);
 endmodule
 
 module stall_or_flush(flush, hold, gui_flush, gui_hold, clk);
-input flush, hold, clk;
-//output reg[1:0] guiout;
-output reg  gui_hold, gui_flush;
+	input flush, hold, clk;
+	//output reg[1:0] guiout;
+	output reg  gui_hold, gui_flush;
 
-integer file;
+	integer file;
 
-initial
-begin
-	gui_flush =0;
-	gui_hold =0;
-end
+	initial
+	begin
+		gui_flush =0;
+		gui_hold =0;
+	end
 
-/*
-always@(negedge clk)
-begin
-end*/
+	/*
+	always@(negedge clk)
+	begin
+	end*/
 
-always@ (posedge clk)
-begin
-gui_flush <= 1'b0;
-gui_hold <= 1'b0;
-/*
-if( guiin == 1)
-	gui_hold <= 1'b1;
-else if( guiin == 2)
-	 gui_flush <= 1'b1;
-else if( guiin == 3)
-	 gui_hold <= 1'b1;*/
-if((flush == 1) && (hold==0))
-	gui_flush <= 1'b1;
-	 //guiout <= 2'b10;
-else if((flush) && (hold))
-	gui_hold <= 1'b1;
-	 //guiout <= 2'b01; 
-else if((flush == 0) && (hold==1))
-	gui_hold <= 1'b1;
-	 //guiout <= 2'b11;
-/*else
-	guiout <= 2'b00;*/
-end
-
+	always@ (posedge clk)
+	begin
+		gui_flush <= 1'b0;
+		gui_hold <= 1'b0;
+		/*
+		if( guiin == 1)
+			 gui_hold <= 1'b1;
+		else if( guiin == 2)
+			 gui_flush <= 1'b1;
+		else if( guiin == 3)
+			 gui_hold <= 1'b1;*/
+		if((flush == 1) && (hold==0))
+			gui_flush <= 1'b1;
+			 //guiout <= 2'b10;
+		else if((flush) && (hold))
+			gui_hold <= 1'b1;
+			 //guiout <= 2'b01; 
+		else if((flush == 0) && (hold==1))
+			gui_hold <= 1'b1;
+			 //guiout <= 2'b11;
+		/*else
+			guiout <= 2'b00;*/
+	end
 endmodule
 module Pipeline_MIPS();
 
 /*=============================================================== WIRES =================================================================*/
 wire Clock, gui_flush, gui_hold, Zero, JR_Signal, Ori, Reg_Dstn, Branch, Branch_Not_Equal, Mem_Read, Mem_to_Reg, Mem_Write, ALU_Src, Reg_Write, Jump, ex_mem_reg_write, ex_mem_memtoreg, ex_mem_mem_write, ex_mem_mem_read, mem_wb_reg_write, mem_wb_memtoreg, flagout, flagin, eof;
-wire beq_and_output, bne_not_output, bne_and_output, branch_or_output, hazard_mux_selector , hold_pc , hold_if_id_reg ,IF_Flush, id_ex_reg_write, id_ex_memtoreg, id_ex_mem_write, id_ex_mem_read,id_ex_alu_src, id_ex_regdst;
+wire  jal_signal,beq_and_output, bne_not_output, bne_and_output, branch_or_output, hazard_mux_selector , hold_pc , hold_if_id_reg ,IF_Flush, id_ex_reg_write, id_ex_memtoreg, id_ex_mem_write, id_ex_mem_read,id_ex_alu_src, id_ex_regdst;
 wire [1:0]  Comp_Mux_1, Comp_Mux_2, upper_mux_forward, lower_mux_forward;
 wire [3:0]  id_ex_aluop, alu_ctrl, ALU_Op;
 wire [4:0]  id_ex_rs,id_ex_rt,id_ex_rd,shift_amount, regdst_mux_out,ex_mem_dstreg, mem_wb_dstreg;
 wire [5:0]  id_ex_func_field;
 wire [9:0]  hazard_mux_output;
-wire [31:0] instruction, pcIn, pcOut, pc_branch_mux_output, inst_IF_Out, PCplus4_IF_Out, jump_mux_output, jr_mux_output, Read_Data_1, Read_Data_2, Sign_Ext_Output, branch_adder_output, jump_address_output ;
+wire [31:0]  jal_mux_out1,jal_mux_out2,instruction, pcIn, pcOut, pc_branch_mux_output, inst_IF_Out, PCplus4_IF_Out, jump_mux_output, jr_mux_output, Read_Data_1, Read_Data_2, Sign_Ext_Output, branch_adder_output, jump_address_output ;
 wire [31:0] comp_upper_mux_out , comp_lower_mux_out, id_ex_Sign_Ext_Output, id_ex_read_data1, id_ex_read_data2, Alu_Result, alu_lower_mux_out, alu_upper_mux_out, alu_src_mux_Output, Read_Data, mem_wb_mux_output, mem_wb_read_data, mem_wb_alu_result, ex_mem_alu_result, ex_mem_lower_mux_out;
 
 /*=======================================================================================================================================*/
@@ -1244,7 +1265,7 @@ CLOCK myClock(Clock);
 /***** PC & PC ADDER *****/ 
 PC pc( pcOut , jr_mux_output , Clock , hold_pc, eof );
 PC_ADDER pc_adder( pcIn , pcOut);
-/***********************/
+/************************/
 
 /******INSTRUCTION MEMORY**********/
 INS_MEMORY ins_memory( instruction , Clock, pcOut);
@@ -1256,7 +1277,7 @@ MUX_32_1 pc_branch_mux( pc_branch_mux_output , pcIn , branch_adder_output, branc
 
 /*********** JUMP MUX **************/
 MUX_32_1 jump_mux(jump_mux_output,pc_branch_mux_output,jump_address_output, Jump);
-MUX_32_1 jr_mux(jr_mux_output , jump_mux_output , Read_Data_1 , JR_Signal ); //WARNING YA SERsssssSY Jump and JR_Signal both are set to 1 if only jr inst comes since I want to flush the next inst by jump signal that is input to hazard unit
+MUX_32_1 jr_mux(jr_mux_output , jump_mux_output , comp_upper_mux_out , JR_Signal ); //WARNING YA SERsssssSY Jump and JR_Signal both are set to 1 if only jr inst comes since I want to flush the next inst by jump signal that is input to hazard unit
 /***********************************/
 
 /******IF/ID REGISTER**************/
@@ -1283,7 +1304,7 @@ MUX_32_2 comp_lower_mux(comp_lower_mux_out ,Read_Data_2,ex_mem_alu_result,mem_wb
 /**********************************/
 
 /**************CONTROLLER**********/
-CONTROL control_unit( JR_Signal , Ori , Reg_Dstn, Branch, Branch_Not_Equal, Mem_Read, Mem_to_Reg, ALU_Op , Mem_Write , ALU_Src , Reg_Write , Jump , inst_IF_Out[31:26] ,inst_IF_Out[5:0]); 
+CONTROL control_unit( jal_siganl,JR_Signal , Ori , Reg_Dstn, Branch, Branch_Not_Equal, Mem_Read, Mem_to_Reg, ALU_Op , Mem_Write , ALU_Src , Reg_Write , Jump , inst_IF_Out[31:26] ,inst_IF_Out[5:0]); 
 /**********************************/
 
 /***************SIGN EXTEND *******/
@@ -1308,9 +1329,14 @@ Hazard_MUX_10_1 hazard_mux( hazard_mux_output , Reg_Write , Mem_to_Reg , Mem_Wri
 /****************************************/
 
 /**************ID_EX REGISTER**********/
-ID_EX_reg id_ex_reg( id_ex_reg_write , id_ex_memtoreg , id_ex_mem_write , id_ex_mem_read , id_ex_alu_src , id_ex_regdst , id_ex_aluop , id_ex_read_data1 ,  id_ex_read_data2 , shift_amount , id_ex_Sign_Ext_Output ,id_ex_rs , id_ex_rt , id_ex_rd ,id_ex_func_field,
-		hazard_mux_output , Read_Data_1 , Read_Data_2 , Sign_Ext_Output ,inst_IF_Out ,Clock ); //control unit input 
+
+MUX_32_1 jal_mux_1(jal_mux_out1,Read_Data_1,PCplus4_IF_Out,jal_siganl);
+MUX_32_1 jal_mux_2(jal_mux_out2,Read_Data_2,32'd0,jal_siganl);
+ID_EX_reg id_ex_reg( jal_siganl,id_ex_reg_write , id_ex_memtoreg , id_ex_mem_write , id_ex_mem_read , id_ex_alu_src , id_ex_regdst , id_ex_aluop , id_ex_read_data1 ,  id_ex_read_data2 , shift_amount , id_ex_Sign_Ext_Output ,id_ex_rs , id_ex_rt , id_ex_rd ,id_ex_func_field,
+		hazard_mux_output , jal_mux_out1 , jal_mux_out2 , Sign_Ext_Output ,inst_IF_Out ,Clock ); //control unit input 
+
 /*************************************/
+
 /*=======================================================================================================================================*/
 
 /*=====================================EXECUTION STAGE + EX_MEM REGISIER=================================================================*/
@@ -1327,37 +1353,34 @@ Forwarding_Unit_EX ex_forward_unit(id_ex_rs,id_ex_rt,ex_mem_dstreg,mem_wb_dstreg
 
 MUX_5_1 reg_dst_mux(regdst_mux_out,id_ex_rt,id_ex_rd,id_ex_regdst);
 
-EX_MemReg ex_mem_reg (Clock,id_ex_reg_write, id_ex_memtoreg,id_ex_mem_write, id_ex_mem_read,Alu_Result,alu_lower_mux_out,regdst_mux_out,ex_mem_reg_write, ex_mem_memtoreg,ex_mem_mem_write
+EX_MemReg ex_mem_reg (jal_signal,Clock,id_ex_reg_write, id_ex_memtoreg,id_ex_mem_write, id_ex_mem_read,Alu_Result,alu_lower_mux_out,regdst_mux_out,ex_mem_reg_write, ex_mem_memtoreg,ex_mem_mem_write
 			,ex_mem_mem_read,ex_mem_alu_result,ex_mem_lower_mux_out,ex_mem_dstreg);
 
 /*=========================================== DATA MEMORY STAGE + MEM/WB REGISTER========================================================*/
 
 DATA_MEMORY data_memory( Read_Data , ex_mem_mem_write , ex_mem_mem_read , ex_mem_alu_result[12:0] , ex_mem_lower_mux_out , Clock , eof, pcOut);
 
-Mem_WbReg mem_wb_reg(ex_mem_reg_write , ex_mem_memtoreg , ex_mem_alu_result ,  Clock , Read_Data  , ex_mem_dstreg ,mem_wb_reg_write , mem_wb_memtoreg , mem_wb_read_data , mem_wb_alu_result , mem_wb_dstreg );
+Mem_WbReg mem_wb_reg(jal_signal,ex_mem_reg_write , ex_mem_memtoreg , ex_mem_alu_result ,  Clock , Read_Data  , ex_mem_dstreg ,mem_wb_reg_write , mem_wb_memtoreg , mem_wb_read_data , mem_wb_alu_result , mem_wb_dstreg );
 MUX_32_1 mem_wb_mux(mem_wb_mux_output , mem_wb_alu_result , mem_wb_read_data , mem_wb_memtoreg );
 
-/*******************************WIRES*******************************/
-
 /*=======================================================================================================================================*/
-stall_or_flush ray2(IF_Flush, hold_pc, gui_flush, gui_hold, Clock);
 
+/*======================================================== GUI INTERFACE ================================================================*/
+stall_or_flush ray2(IF_Flush, hold_pc, gui_flush, gui_hold, Clock);
 integer file, pipeRegs;
 always @(negedge Clock)
 begin
-pipeRegs = $fopen("regs.txt");
-file = $fopen("pc.txt");
-$fwrite(file,"%0d,%0d,%0d %0d,%0d,%0d,%0d\n",pcOut, gui_hold,gui_flush,branch_or_output,upper_mux_forward,lower_mux_forward,mem_wb_memtoreg);
-$fwrite(pipeRegs,"%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d\n",inst_IF_Out,id_ex_reg_write,id_ex_memtoreg,id_ex_mem_write,id_ex_mem_read,id_ex_alu_src,id_ex_regdst,id_ex_aluop,id_ex_read_data1,id_ex_read_data2,shift_amount,id_ex_Sign_Ext_Output,id_ex_rs,id_ex_rt,id_ex_rd ,id_ex_func_field,ex_mem_reg_write, ex_mem_memtoreg,ex_mem_mem_write
+	pipeRegs = $fopen("regs.txt");
+	file = $fopen("pc.txt");
+	$fwrite(file,"%0d,%0d,%0d %0d,%0d,%0d,%0d\n",pcOut, gui_hold,gui_flush,branch_or_output,upper_mux_forward,lower_mux_forward,mem_wb_memtoreg);
+	$fwrite(pipeRegs,"%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d\n",inst_IF_Out,id_ex_reg_write,id_ex_memtoreg,id_ex_mem_write,id_ex_mem_read,id_ex_alu_src,id_ex_regdst,id_ex_aluop,id_ex_read_data1,id_ex_read_data2,shift_amount,id_ex_Sign_Ext_Output,id_ex_rs,id_ex_rt,id_ex_rd ,id_ex_func_field,ex_mem_reg_write, ex_mem_memtoreg,ex_mem_mem_write
 			,ex_mem_mem_read,ex_mem_alu_result,ex_mem_lower_mux_out,ex_mem_dstreg,mem_wb_reg_write , mem_wb_memtoreg , mem_wb_read_data , mem_wb_alu_result , mem_wb_dstreg );
 end
-/*
-not jr_not(jr_not_output, JR_Signal);
-and jr_and(jr_and_output, Reg_Write, jr_not_output);
-MUX_32_1 jr_mux(jr_mux_output, jump_mux_output, Read_Data_1, JR_Signal);
-*/
+/*=======================================================================================================================================*/
 initial
 begin
-$monitor("***************** %b *******************\n pcOut=%h, pcIn:%h, instruction: %h ***************************************",Clock,pcOut,pcIn,instruction);
+$monitor("***************** %b *******************\n pcOut=%h, pcIn:%h, instruction: %h \n jal_siganl : %h  \n PCplus4_IF_Out : %h \n jal_mux_out1  : %h \n jal_mux_out2  : %h \n Read_Data_1 : %h \n ***************************************",Clock,pcOut,pcIn,instruction , jal_siganl , PCplus4_IF_Out,jal_mux_out1, jal_mux_out2, id_ex_read_data1 ,Read_Data_1);
 end
 endmodule
+
+
