@@ -1,0 +1,35 @@
+# vsim -c -do "run -all" work.Pipeline_MIPS 
+# Start time: 07:39:35 on Nov 15,2019
+# Loading work.Pipeline_MIPS
+# Loading work.CLOCK
+# Loading work.PC
+# Loading work.PC_ADDER
+# Loading work.INS_MEMORY
+# Loading work.MUX_32_1
+# Loading work.IF_ID_Reg
+# Loading work.REG_FILE
+# Loading work.JUMP_ADDRESS
+# Loading work.Comparator
+# Loading work.MUX_32_2
+# Loading work.CONTROL
+# Loading work.SIGN_EXTEND
+# Loading work.BR_ADDER
+# Loading work.ID_Forwarding_Unit
+# Loading work.HazardDetectionUnit
+# Loading work.Hazard_MUX_10_1
+# Loading work.ID_EX_reg
+# Loading work.ALU
+# Loading work.ALU_CONTROL
+# Loading work.Forwarding_Unit_EX
+# Loading work.MUX_5_1
+# Loading work.EX_MemReg
+# Loading work.DATA_MEMORY
+# Loading work.Mem_WbReg
+# Loading work.stall_or_flush
+# run -all
+# SIZE ===          11 
+# end_program will save the memory data and exit the verilog program 
+# ** Note: $finish    : C:/Pipeline/Pipeline.v(1042)
+#    Time: 1271 ns  Iteration: 2  Instance: /Pipeline_MIPS/data_memory
+# End time: 07:39:35 on Nov 15,2019, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
