@@ -1,5 +1,5 @@
 # vsim -c -do "run -all" work.Pipeline_MIPS 
-# Start time: 07:39:35 on Nov 15,2019
+# Start time: 11:23:41 on Nov 15,2019
 # Loading work.Pipeline_MIPS
 # Loading work.CLOCK
 # Loading work.PC
@@ -27,9 +27,9 @@
 # Loading work.Mem_WbReg
 # Loading work.stall_or_flush
 # run -all
-# SIZE ===          11 
+# SIZE ===          25 
 # end_program will save the memory data and exit the verilog program 
 # ** Note: $finish    : C:/Pipeline/Pipeline.v(1042)
-#    Time: 1271 ns  Iteration: 2  Instance: /Pipeline_MIPS/data_memory
-# End time: 07:39:35 on Nov 15,2019, Elapsed time: 0:00:00
+#    Time: 2263 ns  Iteration: 2  Instance: /Pipeline_MIPS/data_memory
+# End time: 11:23:42 on Nov 15,2019, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
